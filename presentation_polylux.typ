@@ -81,16 +81,6 @@
   ]
 ]
 
-// Color Classification
-#slide[
-  #text(size: 28pt, weight: "bold")[Color Classification]
-  
-  *HUE-Based Approach:*
-  #figure(
-        image("images/task11.png", width: 100%),
-      )
-]
-
 // Classification Results
 #slide[
   #text(size: 28pt, weight: "bold")[Color Classification]
@@ -104,7 +94,7 @@
       )
     ],
     [
-      *Methodology*:
+      *HUE-based Methodology*:
       1. dominant HUE classification
       2. quantile-based grouping
       3. actually first remove the backgrounds then classify
@@ -122,6 +112,15 @@
       ]
     ]
   )
+]
+
+// Color Classification
+#slide[
+  #text(size: 28pt, weight: "bold")[Color Classification]
+  
+  #figure(
+        image("images/task11.png", width: 100%),
+      )
 ]
 
 // Background Removal Results
@@ -207,13 +206,6 @@
     #v(-0.5cm)
     *Score:* Perfect at 40% |
     Zero at \<5% or \>95%
-    
-    *Why:* Too small = lost details |
-    Too large = cropped wings
-    
-    
-    
-    
   ]
   #v(-0.5cm)
   #rect(
@@ -708,6 +700,37 @@
   )
   
 ]
+
+// Proposed IQA Framework
+#slide[
+  #text(size: 28pt, weight: "bold")[Proposed IQA Framework]
+  
+  #columns(2, gutter: 2em)[
+    *Full-Reference (FR) Measures:*
+    
+    #text(fill: accent-color, weight: "bold")[FSIM]
+    - Feature similarity index
+    - Gradient magnitude + phase
+
+    #text(fill: accent-color, weight: "bold")[VIF]
+    - Visual information fidelity
+    - Information-theoretic approach
+    - Good for inpainting
+    
+    #text(fill: accent-color, weight: "bold")[MS-SSIM]
+    - Multi-scale SSIM
+    
+    #colbreak()
+    
+    *No-Reference (NR) Measures:*
+    
+    #text(fill: accent-color, weight: "bold")[BRISQUE]
+    - Blind quality evaluator
+    - Natural scene statistics
+    - No reference needed
+  ]
+]
+
 #slide[
   #text(size: 28pt, weight: "bold")[Task 3.1.a: Traditional Metrics Fail]
   #align(center)[
@@ -734,58 +757,7 @@
   ]
 ]
 
-// Proposed IQA Framework
-#slide[
-  #text(size: 28pt, weight: "bold")[Proposed IQA Framework]
-  
-  #columns(2, gutter: 2em)[
-    *Full-Reference (FR) Measures:*
-    
-    #text(fill: accent-color, weight: "bold")[FSIM]
-    - Feature similarity index
-    - Gradient magnitude + phase
-    - Better for edges
-    #colbreak()
-    #text(fill: accent-color, weight: "bold")[VIF]
-    - Visual information fidelity
-    - Information-theoretic approach
-    - Good for inpainting
-    
-    #text(fill: accent-color, weight: "bold")[MS-SSIM]
-    - Multi-scale SSIM
-    - Pyramid analysis
-    - Resolution-aware
-    
-    #colbreak()
-    
-    *No-Reference (NR) Measures:*
-    
-    #text(fill: accent-color, weight: "bold")[BRISQUE]
-    - Blind quality evaluator
-    - Natural scene statistics
-    - No reference needed
-    #colbreak()
-    #text(fill: accent-color, weight: "bold")[NIQE]
-    - Natural image quality
-    - Statistical regularities
-    - Domain independent
-    
-    #text(fill: accent-color, weight: "bold")[PIQE]
-    - Perception-based IQA
-    - Spatial activity analysis
-    - Distortion detection
-  ]
-  
-  \
-  #rect(
-    fill: primary-color.lighten(90%),
-    stroke: 1pt + primary-color,
-    radius: 5pt,
-    inset: 10pt
-  )[
-    *Module 2 Implication:* Use FR+NR framework for robust deblurring/inpainting evaluation
-  ]
-]
+
 
 // Task 3.1.b: Background Paradox
 #slide[
@@ -803,32 +775,32 @@
     columns: (1.4fr, 1fr),
     gutter: 2em,
     [
-      #align(center+horizon)[
+      
         #table(
           columns: 5,
           inset: 8pt,
           stroke: 0.5pt + primary-color,
           fill: (x, y) => if y == 0 { primary-color.lighten(90%) },
-          [*Type*], [*PSNR Δ*], [*SSIM Δ*], [*FSIM Δ*], [*VIF Δ*],
+          [*Type*], [*PSNRΔ*], [*SSIMΔ*], [*FSIMΔ*], [*VIFΔ*],
           [Spatial], [+8.58], [+0.506], [-0.001], [+0.42],
           [Noise], [+2.96], [+0.062], [-0.080], [-1.48],
-          [Contrast], [+14.15], [+0.111], [-0.006], [+0.76],
-          [Gamma], [+5.83], [+0.364], [-0.013], [+0.51],
+          [Contra.], [+14.15], [+0.111], [-0.006], [+0.76],
         )
-      ]
+      
+      #text(fill: accent-color, weight: "bold")[Key Insights:]
+      
+      *Traditional Metric Inflation:*
+      - PSNR: +2.96 to +14.15 dB gain
+      - Large improvement
     ],
     [
-      *Paradox Discovery:*
+      *Advanced Metric Degradation:*
+      - SSIM: +0.062 to +0.506 gain
+      - FSIM: -0.001 to -0.080 loss
+      - VIF: up to -1.48 loss
+      - Controllable inflation
       
-      ✅ Traditional metrics improve:
-      - PSNR: +2.96 to +14.15 dB
-      - SSIM: +0.062 to +0.506
-      
-      ❌ Advanced metrics degrade:
-      - FSIM: -0.001 to -0.080
-      - VIF: up to -1.48
-      
-      #text(fill: red, weight: "bold")[Warning: Background removal creates systematic evaluation bias!]
+      #text(fill: red, weight: "bold")[The Paradox: Background removal creates evaluation bias - improves traditional metrics while degrading actual quality!]
     ]
   )
 ]
@@ -841,9 +813,10 @@
     *Architecture Problems:*
     ```python
     model = nn.Sequential(
-      nn.Linear(784*3, 64), # Why 3x?
+      nn.Linear(784*3, 64),
       nn.Tanh(),
-      nn.Linear(64, 16),    # Bottleneck!
+      # Bottleneck!
+      nn.Linear(64, 16), 
       nn.Tanh(),
       nn.Linear(16, 10),
       nn.Softmax(dim=None)  # ERROR!
@@ -851,15 +824,11 @@
     criterion = CrossEntropyLoss()
     ```
     
-    *Double Softmax Bug:*
-    - CrossEntropyLoss includes softmax
-    - Model adds extra softmax
-    - Causes gradient issues
+    #text(fill: red, weight: "bold")[Double Softmax Bug]
     
-    #colbreak()
     
     #figure(
-      image("images/task314.png", width: 100%),
+      image("images/task314.png", width: 80%),
     )
     
     *Performance Issues:*
@@ -867,33 +836,6 @@
     - Class 0: 0% recall
     - Class 5: 47.8% precision
   ]
-]
-
-// Per-class Analysis
-#slide[
-  #text(size: 28pt, weight: "bold")[Original MLP Per-Class Performance]
-  
-  #table(
-    columns: 6,
-    inset: 10pt,
-    stroke: 0.5pt + primary-color,
-    fill: (x, y) => if y == 0 { primary-color.lighten(90%) },
-    align: center,
-    [*Class*], [*Accuracy*], [*Recall*], [*Specificity*], [*Precision*], [*Issue*],
-    [0], [0.901], [0.000], [0.999], [0.000], [Complete failure],
-    [1], [0.998], [0.988], [0.999], [0.994], [Good],
-    [2], [0.995], [0.973], [0.997], [0.972], [Good],
-    [3], [0.994], [0.970], [0.997], [0.973], [Good],
-    [4], [0.996], [0.995], [0.996], [0.967], [Good],
-    [5], [0.901], [0.986], [0.893], [0.478], [Over-prediction],
-    [6-9], [...], [...], [...], [...], [Good],
-  )
-  
-  *Key Problems:*
-  - Catastrophic Class 0 failure (never predicted)
-  - Severe Class 5 over-prediction
-  - 16-unit bottleneck insufficient
-  - Per-image normalization removes global patterns
 ]
 
 // Task 3.2.b: Enhanced MLP
@@ -907,10 +849,11 @@
       #figure(
         image("images/task32b.png", width: 100%),
       )
-    ],
-    [
       *Comprehensive Fixes:*
       1. Remove double softmax ✓
+      
+    ],
+    [
       2. Expand architecture:
          512→512→256→128→10
       3. Add BatchNorm + Dropout
@@ -928,172 +871,172 @@
   )
 ]
 
+// Original vs Enhanced MLP Comparison
+#slide[
+  #text(size: 28pt, weight: "bold")[Original MLP vs Enhanced MLP Performance]
+  
+  #table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    inset: 8pt,
+    stroke: 0.5pt + primary-color,
+    fill: (x, y) => if y == 0 { primary-color.lighten(90%) },
+    align: center,
+    [*Class*], [*Original Recall*], [*Enhanced Recall*], [*Original Precision*], [*Enhanced Precision*], [*Change*],
+    [0], [0.0%], [0.0%], [0.0%], [0.0%], [#text(fill: red)[Still Failed]],
+    [1-4, 9], [~97-99%], [~99%], [~97-99%], [~98-100%], [#text(fill: green, weight: "bold")[Improved]],
+    [5], [98.6%], [100.0%], [47.8%], [47.9%], [#text(fill: orange)[Precision  --]],
+    [6], [98.7%], [100.0%], [98.5%], [74.2%], [#text(fill: orange)[Precision ↓]],
+    [7], [97.3%], [99.3%], [97.7%], [90.8%], [Mixed],
+    [8], [96.4%], [53.4%], [97.3%], [98.9%], [#text(fill: red)[Recall ↓]],
+  )
+  
+  #v(0.5em)
+  
+  #rect(
+    fill: orange.lighten(90%),
+    stroke: 1pt + orange,
+    radius: 5pt,
+    inset: 10pt
+  )[
+    #text(fill: orange.darken(20%), weight: "bold")[Mixed Results:] Despite 97.3% loss reduction, some classes worsened:
+    - Class 0: Still 0% recall (fundamental architecture issue)
+    - Class 8: Recall dropped from 96.4% to 53.4%
+    - Classes 5-7: Precision issues persist or worsen
+  ]
+  
+  #v(0.5em)
+  
+  *Key Insights:*
+  - Loss reduction ≠ uniform improvement 
+  - Some enhancements can hurt specific classes
+  - Overfitting on both train and validation dataset?
+]
+
 // Task 3.2.c: CNN Analysis
 #slide[
   #text(size: 28pt, weight: "bold")[Task 3.2.c: CNN vs MLP Comparison]
   
-  #columns(2, gutter: 2em)[
-    *CNN Architecture:*
-    - AlexNet pretrained
-    - 48.3M parameters
-    - Transfer learning
-    - Spatial features
-    
-    *Prediction:*
-    Should outperform MLP due to:
-    - Spatial inductive bias
-    - Hierarchical features
-    - Transfer learning
-    
-    *Reality:*
-    - Test accuracy: 89.77%
-    - Class 0: 22.7% → 0.2% recall
-    - ImageNet→MNIST mismatch
-    
-    #colbreak()
-    
-    #figure(
-      image("images/task32c.png", width: 100%),
-    )
-    
-    #rect(
-      fill: accent-color.lighten(90%),
-      stroke: 1pt + accent-color,
-      radius: 5pt,
-      inset: 10pt
-    )[
-      *Finding:* 48.3M-parameter CNN failed to beat 1.6M MLP due to domain mismatch
-    ]
-  ]
-]
-
-// Final Comparison
-#slide[
-  #text(size: 28pt, weight: "bold")[Final Performance Comparison]
-  
-  #table(
-    columns: 4,
-    inset: 10pt,
-    stroke: 0.5pt + primary-color,
-    fill: (x, y) => if y == 0 { primary-color.lighten(90%) },
-    align: (left, center, center, center),
-    [*Metric*], [*Original MLP*], [*Enhanced MLP*], [*Enhanced CNN*],
-    [Overall Accuracy], [~90%], [85.33%], [89.77%],
-    [Training Loss], [1.464], [0.039], [0.000297],
-    [Validation Loss], [1.480], [0.014], [0.005],
-    [Training Efficiency], [Poor], [38.19 acc/min], [6.05 acc/min],
-    [Class 0 Recall], [0.0%], [0.0%], [0.2%],
-    [Parameter Count], [~150K], [1.6M], [48.3M],
-  )
-  
-  #v(1em)
-  
-  #columns(3, gutter: 2em)[
-    #rect(
-      fill: primary-color.lighten(90%),
-      stroke: 1pt + primary-color,
-      radius: 5pt,
-      inset: 10pt
-    )[
-      *Implementation > Architecture*
-      
-      Single-line fix yielded 97.3% improvement
-    ]
-    
-    #rect(
-      fill: primary-color.lighten(90%),
-      stroke: 1pt + primary-color,
-      radius: 5pt,
-      inset: 10pt
-    )[
-      *Per-class Analysis Essential*
-      
-      Aggregate metrics hide catastrophic failures
-    ]
-    
-    #rect(
-      fill: primary-color.lighten(90%),
-      stroke: 1pt + primary-color,
-      radius: 5pt,
-      inset: 10pt
-    )[
-      *Domain Mismatch Matters*
-      
-      ImageNet→MNIST transfer learning failed
-    ]
-  ]
-]
-
-// ML Results - Keep original slide
-#slide[
-  #text(size: 28pt, weight: "bold")[Systematic Improvements]
-  
-  
-  
   #grid(
-    columns: (1.4fr, 1fr),
+    columns: (2.9fr, 1fr),
     gutter: 2em,
     [
-      #figure(
-        image("images/task32b.png", width: 100%),
-        caption: "97.3% loss reduction"
+      #table(
+        columns: (auto, auto, auto, auto),
+        inset: 10pt,
+        stroke: 0.5pt + primary-color,
+        fill: (x, y) => if y == 0 { primary-color.lighten(90%) },
+        align: (left, center, center, center),
+        [*Metric*], [*Original MLP*], [*Enhanced MLP*], [*CNN*],
+        [Overall Accuracy], [~90%], [85.33%], [#text(fill: green, weight: "bold")[98.4%]],
+        [Training Loss], [1.464], [0.039], [#text(fill: green)[0.0003]],
+        [Val Loss], [1.480], [0.014], [#text(fill: green)[0.0113]],
+        [Class 0 Recall], [#text(fill: red)[0.0%]], [#text(fill: red)[0.0%]], [#text(fill: green, weight: "bold")[22.7%]],
+        [Class 5 Precis], [47.8%], [47.9%], [#text(fill: green, weight: "bold")[71.8%]],
       )
     ],
     [
-      *Single-line fix yields:*
-      - Loss: 1.464 → 0.039
-      - Validation: 99.60%
-      
-      
-      *Key Lessons:*
-      #enum(
-        "Implementation > Architecture",
-        "Per-class analysis essential",
-        "Systematic debugging works"
-      )
-    ]
-  )
-]
-
-// Conclusions
-#slide[
-  #text(size: 28pt, weight: "bold")[Key Achievements]
-  
-  
-  
-  #grid(
-    columns: (1fr, 1fr, 1fr),
-    gutter: 2em,
-    [
-      #text(weight: "bold", fill: accent-color)[Module 1]
-      - 100% classification
-      - Professional removal
-      - Perfect detection
-    ],
-    [
-      #text(weight: "bold", fill: accent-color)[Module 2]
-      - Strong PnP-ADMM
-      - Overfitting discovery
-      - Early stopping
-    ],
-    [
-      #text(weight: "bold", fill: accent-color)[Module 3]
-      - IQA framework
-      - Background paradox
-      - 99% improvement
-    ]
-  )
-  
-  #v(1cm)
-  
-  #align(center)[
-    #rect(fill: primary-color.lighten(90%), inset: 15pt)[
-      #text(size: 18pt)[
-        *Overall Impact:* Combining classical techniques with modern deep learning,
-        while maintaining rigorous evaluation, yields superior results
+      #rect(
+        fill: green.lighten(90%),
+        stroke: 1pt + green,
+        radius: 5pt,
+        inset: 10pt
+      )[
+        #text(fill: green.darken(20%), weight: "bold")[CNN Success:] CNN achieves 98.4% accuracy and is the ONLY model that can recognize Class 0 (22.7% recall)! 
       ]
     ]
+  )
+]
+
+// CNN Enhancement Details
+#slide[
+  #text(size: 28pt, weight: "bold")[CNN Enhancement Strategy]
+  
+  #columns(2, gutter: 2em)[
+    *Enhancement Techniques:*
+    
+    #text(fill: accent-color, weight: "bold")[1. Focal Loss (γ=2.0)]
+    - Addresses severe class imbalance
+    - Class 0: 5× weight
+    - Classes 2 & 5: 2× weight
+    
+    #text(fill: accent-color, weight: "bold")[2. Class-Specific Augmentation]
+    - Class 0: 15° rotation, 30% brightness
+    - Classes 2 & 5: 12° rotation, 25% brightness
+
+    #text(fill: accent-color, weight: "bold")[3. Architecture Modifications]
+    - Frozen early layers (features[:6])
+    - Modified classifier: 4096→2048→10
+    - BatchNorm + reduced dropout (0.35)
+    
+    #text(fill: accent-color, weight: "bold")[4. Training Optimizations]
+    - AdamW with weight decay
+    - ReduceLROnPlateau scheduler
+    - WeightedRandomSampler
+    - ImageNet preprocessing
   ]
+]
+
+// Original vs Enhanced CNN Comparison
+#slide[
+  #text(size: 28pt, weight: "bold")[Original CNN vs Enhanced CNN Performance]
+  
+  #table(
+    columns: (auto, auto, auto, auto, auto, auto),
+    inset: 8pt,
+    stroke: 0.5pt + primary-color,
+    fill: (x, y) => if y == 0 { primary-color.lighten(90%) },
+    align: center,
+    [*Class*], [*Original Recall*], [*Enhanced Recall*], [*Original Precision*], [*Enhanced Precision*], [*Change*],
+    [0], [22.7%], [0.2%], [99.6%], [50.0%], [#text(fill: red, weight: "bold")[Severe ↓]],
+    [4], [99.9%], [100.0%], [94.5%], [96.6%], [Improved],
+    [5], [99.8%], [99.7%], [71.8%], [61.1%], [#text(fill: orange)[Precision ↓]],
+    [1-3, 6-9], [...], [...], [...], [...], [Stable],
+  )
+  
+  #rect(
+    fill: red.lighten(90%),
+    stroke: 1pt + red,
+    radius: 5pt,
+    inset: 10pt
+  )[
+    #text(fill: red.darken(20%), weight: "bold")[Critical Failure:] Despite aggressive enhancements (5× weighting, focal loss, targeted augmentation), 
+    Class 0 performance *worsened* from 22.7% to 0.2% recall!
+  ]
+  
+]
+
+#slide[
+  #figure(
+      image("images/task32c.png", width: 90%),
+    )
+]
+
+// Task 3.2.c Key Insights
+#slide[
+  #text(size: 28pt, weight: "bold")[Task 3.2.c: Critical Insights]
+  
+  
+  #grid(
+    columns: (1fr, 1fr),
+    gutter: 3em,
+    [
+      *Original CNN Success:*
+      - Class 0 recall: 0% → 22.7% ✓
+      - First model to recognize digit 0
+      - Spatial features helped
+      - Proved CNN architecture value
+      
+      *But Enhanced CNN Failed:*
+      - Class 0 recall: 22.7% → 0.2% ✗
+      - But works well on training data
+    ],
+    [
+      *Why Enhancement Failed:*
+      1. Techniques too sophisticated
+      2. Pre-trained model has own distribution, aggressive post-training will break the well-learned prior knowledge
+      3. #text(fill: red, weight: "bold")[Overfitting!!] Training data size too small, cannot represent the overall data distribution, causing severe problems on test dataset.
+    ]
+  )
 ]
 
 // Thank You
